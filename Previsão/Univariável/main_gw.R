@@ -13,13 +13,15 @@ source("ets_gw.R")
 source("lm_gw.R")
 source("rf_gw.R")
 source("naive_gw.R")
+source("funcoes_metricas.R")
+
 
 # Read data
 cat("read walmart time series:")
 dados <- read.csv("walmart.csv")
 
 # Extract department time series data
-departments <- c("WSdep1", "WSdep2")#, "WSdep3", "WSdep4") # Update with actual department names
+departments <- c("WSdep1", "WSdep2", "WSdep3", "WSdep4") # Update with actual department names
 results <- list()
 
 for (dep in departments) {
@@ -32,7 +34,7 @@ for (dep in departments) {
   # Set parameters
   Test <- K 
   S <- round(K/1) 
-  Runs <- 8 
+  Runs <- 3 #mudar para 8
   
   W <- (L-Test)-(Runs-1)*S 
   W_arima <- (L-Test)-(Runs-1)*S
@@ -253,9 +255,24 @@ for (dep in departments) {
   cat("nnetar median R^2:", median(results[[dep]]$r2_nnetar), "\n")
   cat("LM median R^2:", median(results[[dep]]$r2_lm), "\n")
   cat("Random Forest median R^2:", median(results[[dep]]$r2_rf), "\n")  
-  cat("Naive median R^2:", median(results[[dep]]$r2_naive),  "\n\n") 
+  cat("Naive median R^2:", median(results[[dep]]$r2_naive),  "\n\n") #r2 do naive é na porque o desvio padrao é 0->Uma possível razão para isso é que os dados de entrada para o modelo Naive podem conter muito pouca variação. 
 }
 
 
 
-#r2 do naive é na porque o desvio padrao é 0->Uma possível razão para isso é que os dados de entrada para o modelo Naive podem conter muito pouca variação. 
+
+# Determine the best method for each department
+best_methods_per_department <- lapply(departments, function(dep) determine_best_method(results, dep))
+
+# Determine the best method globally
+global_best_method <- determine_global_best_method(results, departments)
+
+# Print the results
+cat("Best method for each department:\n")
+for (i in 1:length(departments)) {
+  cat("Department", departments[i], ":", best_methods_per_department[[i]], "\n")
+}
+cat("\nGlobal best method:", global_best_method, "\n")
+
+
+
