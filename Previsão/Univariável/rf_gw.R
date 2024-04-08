@@ -1,4 +1,5 @@
 library(rminer)
+library(randomForest)
 
 rf_gw <- function(D, Test, W_rf, S, b) {
   H_rf <- holdout(D$y, ratio=Test, mode="incremental", iter=b, window=W_rf, increment=S)   
